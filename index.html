@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>謎解き判定サイト</title>
+<style>
+body {
+  font-family: sans-serif;
+  background: #f9f9f9;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.8;
+}
+.hidden { display: none; }
+button {
+  margin: 10px 5px;
+  padding: 10px 20px;
+}
+input, select {
+  margin: 0 4px;
+  padding: 4px;
+}
+.formSentence {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+}
+img {
+  max-width: 100%;
+  display: block;
+  margin: 10px 0;
+}
+#resultImages img {
+  max-width: 150px;
+  margin: 5px;
+}
+</style>
+</head>
+<body>
+
+<!-- ======= 開始画面 ======= -->
+<div id="startScreen">
+  <h1>臨時対策本部</h1>
+  <h2>ストーリー</h2>
+  <p>警察のもとに爆破予告が届いた。どうやらこの市内に爆弾が５つ仕掛けられたようだ。<br>
+     警察はリドルビルディングのこの部屋を「臨時対策本部」として借り、爆弾の位置特定を急いでいる。<br>
+     どうやら犯人は動画で爆弾の位置に関して、ヒントを出してくれているようだ。<br>
+     犯人の残した動画に隠された情報を見つけ、全ての爆弾の位置を特定せよ！<br>
+     ヒント動画の URL はコチラ→ https://www.youtube.com/watch?v=vF_r-_qlA_Y <br>
+  </p>
+  <button id="startBtn">【調査を開始する】</button>
+</div>
+
+<!-- ======= 解答判定画面 ======= -->
+<div id="quizScreen" class="hidden">
+  <h2>５つの爆弾を解除せよ</h2>
+  <form id="quizForm" class="formSentence">
+    映像内の
+    <label>
+      <select id="select1">
+        <option value="">（選択）</option>
+        <option>読んだ本</option>
+        <option>ティッシュ箱</option>
+        <option>犯人の顔</option>
+        <option>ストップウォッチの画面</option>
+        <option>服の数</option>
+        <option>花</option>
+        <option>カメラの視点移動</option>
+        <option>照明</option>
+        <option>服の模様</option>
+        <option>筋トレの様子</option>
+        <option>食べたもの</option>
+        <option>蚊取り線香</option>
+        <option>カメラの撮影角度</option>
+        <option>棚</option>
+        <option>お茶の残量</option>
+      </select>
+    </label>
+    が
+    <label>
+      <select id="select2">
+        <option value="">（選択）</option>
+        <option>アルファベット</option>
+        <option>フリック入力</option>
+        <option>いろは歌</option>
+        <option>干支</option>
+        <option>キーボード入力</option>
+        <option>素数</option>
+        <option>ドレミの歌</option>
+        <option>カレンダー</option>
+        <option>星の名前</option>
+        <option>色名</option>
+      </select>
+      <input type="text" id="text2" placeholder="自由記述" style="width: 120px;">
+    </label>
+    を表している。そのまま読み取ると
+    <input type="text" id="message" placeholder="読み取って得た文字列" style="width: 150px;">
+    である。よって、爆弾のあるエリアは
+    <select id="answerSelect">
+      <option value="">（選択）</option>
+      <option>A1</option>
+      <option>A2</option>
+      <option>A3</option>
+      <option>A4</option>
+      <option>A5</option>
+      <option>A6</option>
+      <option>B1</option>
+      <option>B2</option>
+      <option>B3</option>
+      <option>B4</option>
+      <option>B5</option>
+      <option>B6</option>
+      <option>C1</option>
+      <option>C2</option>
+      <option>C3</option>
+      <option>C4</option>
+      <option>C5</option>
+      <option>C6</option>
+      <option>D1</option>
+      <option>D2</option>
+      <option>D3</option>
+      <option>D4</option>
+      <option>D5</option>
+      <option>D6</option>
+      <option>E1</option>
+      <option>E2</option>
+      <option>E3</option>
+      <option>E4</option>
+      <option>E5</option>
+      <option>E6</option>
+      <option>F1</option>
+      <option>F2</option>
+      <option>F3</option>
+      <option>F4</option>
+      <option>F5</option>
+      <option>F6</option>
+    </select>
+    。
+    <div style="margin-top:10px;">
+      <button type="button" id="checkBtn">【解答を判定する】</button>
+      <button type="button" id="explainBtn">【説明を見る】</button>
+    </div>
+  </form>
+  <div id="quizResult"></div>
+  <div id="resultImages"></div>
+</div>
+
+<!-- ======= 最終問題画面 ======= -->
+<div id="finalScreen" class="hidden">
+  <h2>最後の爆弾を解除せよ</h2>
+  <p>犯人から新たな動画が送られてきた！　https://www.youtube.com/watch?v=Av27zLjFsDE<br>
+     どうやら爆弾はもう１つあるらしい。これが最後の爆弾だ！爆弾の位置を特定し、解除せよ！<br>
+     どうやら６つ目の爆弾については、君が「位置の特定」と「解除番号の特定」の両方をする必要があるらしい。解除部隊のことは無視しよう。</p>
+  <form id="finalForm" class="formSentence">
+    <input type="text" id="f1" placeholder="" style="width:120px;">
+    が
+    <input type="text" id="f2" placeholder="" style="width:120px;">
+    を表していて，爆弾の
+    <input type="text" id="f3" placeholder="" style="width:120px;">
+    は
+    <input type="text" id="f4" placeholder="" style="width:120px;">
+    と一致する。よって6つ目の爆弾は
+    <select id="fAnswer">
+      <option value="">（選択）</option>
+      <option>A1</option>
+      <option>A2</option>
+      <option>A3</option>
+      <option>A4</option>
+      <option>A5</option>
+      <option>A6</option>
+      <option>B1</option>
+      <option>B2</option>
+      <option>B3</option>
+      <option>B4</option>
+      <option>B5</option>
+      <option>B6</option>
+      <option>C1</option>
+      <option>C2</option>
+      <option>C3</option>
+      <option>C4</option>
+      <option>C5</option>
+      <option>C6</option>
+      <option>D1</option>
+      <option>D2</option>
+      <option>D3</option>
+      <option>D4</option>
+      <option>D5</option>
+      <option>D6</option>
+      <option>E1</option>
+      <option>E2</option>
+      <option>E3</option>
+      <option>E4</option>
+      <option>E5</option>
+      <option>E6</option>
+      <option>F1</option>
+      <option>F2</option>
+      <option>F3</option>
+      <option>F4</option>
+      <option>F5</option>
+      <option>F6</option>
+    </select>
+    にあり、
+    爆弾は
+    <input type="text" id="fReal" placeholder="" style="width:120px;">
+    である。なお、その
+    <input type="text" id="fRealCopy" placeholder="" style="width:120px;">
+    もこれが答えであることを裏付けている。そして、解除番号は
+    <input type="text" id="fNumber" placeholder="" style="width:120px;">
+    である。
+    <div style="margin-top:10px;">
+      <button type="button" id="finalCheckBtn">【解答を判定する】</button>
+      <button type="button" id="backToStartBtn">【説明を見る】</button>
+      <!-- <button type="button" id="showInfoBtn">【今までの情報を見る】</button> -->
+    </div>
+  </form>
+  <div id="finalResult"></div>
+  <div id="resultImages"></div>
+</div>
+
+<script>
+// ======== 問題データ ========
+const answers = [
+  { id:1, select1:["花"], select2:["アルファベット"], message:["pet store","petstore","ペットストア"], answer:["C2"]},
+  { id:2, select1:["服の模様"], select2:["魔方陣","まほうじん"], message:["257×364","257x364","257かける364","にひゃくごじゅうななかけるさんびゃくろくじゅうよん","257✕364","257*364","257＊364"], answer:["B4"]},
+  { id:3, select1:["棚"], select2:["点字","日本語点字","てんじ"], message:["ほしのあいだ","星の間","星のあいだ","ほしの間"], answer:["C5"]},
+  { id:4, select1:["筋トレの様子"], select2:["もーるすしんごう","モールス信号","日本語モールス信号","日本語のモールス信号","morse code"], message:["ほんや","しんきゅうしょてん","しんきゅう書店","本屋"], answer:["D2"]},
+  { id:5, select1:["照明"], select2:["アルファベット"], message:["art","あーと","アート"], answer:["E4"]},
+];
+const finalAnswer = {
+  f1:["市内マップ","マップ","地図","まっぷ","ちず"],
+  f2:["オセロの盤面","リバーシの盤面","オセロ盤面","オセロ盤","リバーシ盤面","リバーシ盤"],
+  f3:["配置","位置","場所","ブロック","エリア"],
+  f4:["最善手","オセロの最善手","リバーシの最善手"],
+  fAnswer:["E3"],
+  fReal:["挑戦状の封筒","封筒","挑戦状が入っている封筒","挑戦状が入った封筒","挑戦状の入っている封筒","挑戦状の入った封筒"],
+  fRealCopy:["色","全体色"],
+  fNumber:["5963","５９６３"]
+};
+
+// ======== DOM ========
+const startScreen = document.getElementById("startScreen");
+const quizScreen = document.getElementById("quizScreen");
+const finalScreen = document.getElementById("finalScreen");
+const quizResult = document.getElementById("quizResult");
+const finalResult = document.getElementById("finalResult");
+const resultImages = document.getElementById("resultImages");
+
+// ======== 画面切り替え ========
+function show(screen) {
+  [startScreen, quizScreen, finalScreen].forEach(s => s.classList.add("hidden"));
+  screen.classList.remove("hidden");
+  localStorage.setItem("screen", screen.id);
+}
+
+// ======== 起動時 ========
+window.addEventListener("load", () => {
+  const screen = localStorage.getItem("screen") || "startScreen";
+  show(document.getElementById(screen));
+
+  const imgs = JSON.parse(localStorage.getItem("images")||"[]");
+  imgs.forEach(src => {
+    const img = document.createElement("img");
+    img.src = src;
+    resultImages.appendChild(img);
+  });
+});
+
+// ======== イベント ========
+startBtn.onclick = () => show(quizScreen);
+explainBtn.onclick = () => show(startScreen);
+backToStartBtn.onclick = () => show(startScreen);
+// showInfoBtn.onclick = () => resultImages.classList.toggle("hidden");
+
+// ======== 判定処理 ========
+checkBtn.onclick = () => {
+  const s1 = select1.value;
+  const s2 = select2.value;
+  const t2 = text2.value;
+  const msg = message.value.trim();
+  const ans = answerSelect.value;
+
+  const match = answers.find(q =>
+    q.select1.includes(s1) &&
+    (q.select2.includes(s2) || q.select2.includes(t2)) &&
+    q.message.includes(msg) &&
+    (q.answer.includes(ans))
+  );
+
+  if (match) {
+    quizResult.innerHTML = `<p>「爆弾${match.id} 」を解除した！また、解除部隊から爆弾の外見と中に入っていた紙が送られてきた！</p>`;
+    if(match.id == 1){ // 花瓶　pet store C2
+      quizResult.innerHTML += `<p>花瓶に挿している花はバラ(rose)とチューリップ(tulip)。挿している数と何文字目かを対応させて文字を拾うと、<br>「pet store」になるから、C2 にあるペットショップに爆弾があると分かるんだな。<br>解除部隊によって「爆弾１」が無事解除されたようだ！よくやった！<br>解除部隊によると、どうやら爆弾は入れ物自体らしいぞ。</p>`
+    }
+    else if(match.id == 2){ // 服　B4
+      quizResult.innerHTML += `<p>たしかに服の模様が魔方陣になっていて、図形の位置の数字を読んで並べると 257×364 になる。<br>それを用紙サイズだと考えると「B4」となるから B4 にある市役所に爆弾があるということだな。<br>解除部隊によって「爆弾２」が無事解除されたようだ！よくやった！<br>解除部隊によると、どうやら爆弾は入れ物自体らしいぞ。</p>`
+    }
+    else if(match.id == 3){ // 本棚　星の間　C5
+      quizResult.innerHTML += `<p>棚に物が入っているか入っていないかを考えて、棚を点字と見なすと「ほしのあいだ」となる。<br>それを市内マップ上で考えると A5 と E5 に星のつく施設があるから、C5 にあるランサードームに爆弾があるということだな。<br>解除部隊によって「爆弾３」が無事解除されたようだ！よくやった！<br>解除部隊によると、どうやら爆弾は入れ物自体らしいぞ。</p>`
+    }
+    else if(match.id == 4){ // モールス　D2
+      quizResult.innerHTML += `<p>ダンベルでの筋トレをモールス信号だと見なすと「ほんや」となる。<br>だから D2 のしんきゅう書店に爆弾があるということだな。<br>解除部隊によって「爆弾４」が無事解除されたようだ！よくやった！<br>解除部隊によると、どうやら爆弾は入れ物自体らしいぞ。</p>`
+    }
+    else if(match.id == 5){ // 照明　E4
+      quizResult.innerHTML += `<p>部屋の照明の切り替えのタイミングがちょうど分と秒が 0 になるタイミングであることと映像が 26 時間分あることから、<br>照明が切り替わるタイミングのアルファベットの文字を読むと「art」になるから、<br>E4 のベリーモダン美術館に爆弾があるということだな。<br>解除部隊によって「爆弾５」が無事解除されたようだ！よくやった！<br>解除部隊によると、どうやら爆弾は入れ物自体らしいぞ。</p>`
+    }
+    const imgSrc = `https://oxomisosiru.web.fc2.com/rinzitaisaku_20251018/bomb${match.id}/banner.png`;
+    const img = document.createElement("img");
+    img.src = imgSrc;
+    resultImages.appendChild(img);
+
+    const imgs = JSON.parse(localStorage.getItem("images")||"[]");
+    if (!imgs.includes(imgSrc)) imgs.push(imgSrc);
+    localStorage.setItem("images", JSON.stringify(imgs));
+    localStorage.setItem("q"+match.id, "correct");
+
+    const allClear = answers.every(q => localStorage.getItem("q"+q.id)==="correct");
+    if (allClear) show(finalScreen);
+  } else {
+    quizResult.innerHTML += "<p>うーん、それは違うんじゃないか？考え直してみてくれ。</p>";
+  }
+};
+
+// ======== 最終問題 ========
+finalCheckBtn.onclick = () => {
+  const inputs = {
+    f1:f1.value.trim(), f2:f2.value.trim(), f3:f3.value.trim(),
+    f4:f4.value.trim(), fAnswer:fAnswer.value, fReal:fReal.value.trim(), fRealCopy:fRealCopy.value.trim(), fNumber:fNumber.value.trim()
+  };
+  const ok = Object.keys(finalAnswer).every(k => finalAnswer[k].includes(inputs[k]));
+  if (ok) {
+    finalResult.innerHTML = `<p>６つ目の爆弾を解除した！<br>全ての爆弾を解除した！<br>「臨時対策本部謎」クリア<br>おめでとうございます。</p>`;
+    localStorage.setItem("final","clear");
+  } else {
+    finalResult.innerHTML = "<p>うーん、それは違うんじゃないか？考え直してみてくれ。</p>";
+  }
+};
+
+// ======== 入力排他 ========
+text2.addEventListener("input", () => {
+  select2.disabled = text2.value.trim() !== "";
+});
+select2.addEventListener("change", () => {
+  text2.disabled = select2.value !== "";
+});
+</script>
+</body>
+</html>
